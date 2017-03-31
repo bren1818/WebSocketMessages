@@ -8,6 +8,8 @@ shell_exec('SCHTASKS /DELETE /TN "_notepad" /F');
 <html>
 <head>
 	<meta charset='UTF-8' />
+	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<title>Bren's Socket Messaging</title>
 	<style>
 		input, textarea {border:1px solid #CCC;margin:0px;padding:0px}
 
@@ -31,16 +33,50 @@ shell_exec('SCHTASKS /DELETE /TN "_notepad" /F');
 	<script src="fancywebsocket.js"></script>
 	<script>
 		var Server;
+		var allowNotification = 0;
+		
+		//Notifications
+		if (!("Notification" in window)) { 
+			//No Support
+		}else if( Notification.permission === "granted") {
+			allowNotification = 1;
+		}else if (Notification.permission !== "denied") {
+			Notification.requestPermission(function (permission) {
+				console.log(permission);
+				if (permission === "granted") {
+					allowNotification = 1;
+				}
+			});
+		}
+		
+		function spawnNotification(theBody,theIcon,theTitle) {
+		  var options = {
+			  body: theBody,
+			  icon: theIcon
+		  }
+		  var n = new Notification(theTitle,options);
+			  n.onclick = function() { window.alert("opened Notification"); }
+			  setTimeout(n.close.bind(n), 500);
+		}
 
 		function log( text , sender) {
 			$log = $('#log');
 			//Add text to log
 			if( sender == "self" ){
 				$log.append('<div class="message">' + text  + '</div><div class="clear"></div>');
+				
 			}else if(sender == "server"){
 				$log.append('<div class="message server">' + text  + '</div><div class="clear"></div>');
+				
 			}else{
 				$log.append('<div class="message external">' + text  + '</div><div class="clear"></div>');
+				
+				var mfrom = text.substring( 0, text.indexOf(":") );
+				
+				if( allowNotification ){
+					spawnNotification( text , 'http://205.189.20.193:81/favicon.ico' , 'New Message from: ' + mfrom );
+				}
+				
 			}
 			//Autoscroll
 			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
@@ -109,6 +145,9 @@ shell_exec('SCHTASKS /DELETE /TN "_notepad" /F');
 			$('#log').click( function (){ $('#message').focus(); });
 			$('#send').click(function(){ presend( $('#message').val() ); });
 		});
+		
+		
+		
 		
 	</script>
 </head>
