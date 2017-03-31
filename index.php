@@ -66,15 +66,20 @@ shell_exec('SCHTASKS /DELETE /TN "_notepad" /F');
 				$log.append('<div class="message">' + text  + '</div><div class="clear"></div>');
 				
 			}else if(sender == "server"){
-				$log.append('<div class="message server">' + text  + '</div><div class="clear"></div>');
+				var x = JSON.parse( text );
+				console.log( x );
+				$log.append('<div class="message server">' + x.message  + '</div><div class="clear"></div>');
 				
 			}else{
-				$log.append('<div class="message external">' + text  + '</div><div class="clear"></div>');
+				var x = JSON.parse( text );
+				console.log( x );
 				
-				var mfrom = text.substring( 0, text.indexOf(":") );
+				$log.append('<div class="message external">' + x.message  + '</div><div class="clear"></div>');
+				
+				var mfrom = '<a href="">' + x.from + '</a>';
 				
 				if( allowNotification ){
-					spawnNotification( text , 'http://205.189.20.193:81/favicon.ico' , 'New Message from: ' + mfrom );
+					spawnNotification( x.message , 'http://205.189.20.193:81/favicon.ico' , 'New Message from: ' + x.message );
 				}
 				
 			}

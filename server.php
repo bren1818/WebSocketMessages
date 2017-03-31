@@ -52,10 +52,11 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 			}else{
 				//server Ip, broadcast the message.
 				if ( $id != $clientID ){
+					$userINFO = md5($id.PRIVATE_KEY);
 					if( SHOW_REMOTE_IP_INFO ){
-						$Server->wsSend($id, "$clientID ($ip) $message");
+						$Server->wsSend($id, json_encode( array("from" => $userINFO, "to" => $id, "message" => $message) ) );
 					}else{
-						$Server->wsSend($id, "$message");
+						$Server->wsSend($id, json_encode( array("from" => "*", "to" => $id, "message" => $message) ) );
 					}
 				}
 			}
@@ -76,9 +77,9 @@ function wsOnOpen($clientID)
 		foreach ( $Server->wsClients as $id => $client ){
 			if ( $id != $clientID ){
 				if( SHOW_REMOTE_IP_INFO ){
-					$Server->wsSend($id, "Visitor $clientID ($ip) has joined the room.");
+					$Server->wsSend($id, json_encode( array("from" => "$ip", "to" => $id, "message" => "Visitor $clientID has joined the room.") ) );
 				}else{
-					$Server->wsSend($id, "Visitor has joined the room.");
+					$Server->wsSend($id, json_encode( array("from" => "*", "to" => $id, "message" => "Visitor has joined the room.") ) );
 				}
 			}
 		}
@@ -96,9 +97,9 @@ function wsOnClose($clientID, $status) {
 		//Send a user left notice to everyone in the room
 		foreach ( $Server->wsClients as $id => $client ){
 			if( SHOW_REMOTE_IP_INFO ){
-				$Server->wsSend($id, "Visitor $clientID ($ip) has left the room.");
+				$Server->wsSend($id, json_encode( array("from" => "$ip", "to" => $id, "message" => "Visitor $clientID has left the room." ) ) );
 			}else{
-				$Server->wsSend($id, "Visitor has left the room.");
+				$Server->wsSend($id, json_encode( array("from" => "*", "to" => $id, "message" => "Visitor has left the room.") ) );
 			}
 		}
 	}
